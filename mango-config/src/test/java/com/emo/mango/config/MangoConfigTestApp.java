@@ -6,17 +6,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.junit.Test;
-
 import com.typesafe.config.ConfigFactory;
 
 
-public class MangoConfigTest {
+public class MangoConfigTestApp {
 
-	@Test
+	public static void main(String[] args) throws SQLException, InterruptedException {
+		final MangoConfigTestApp ta = new MangoConfigTestApp();
+		ta.testMangoConfig();
+		ta.testMangoConfig2();
+	}
+	
+
 	public void testMangoConfig() throws SQLException {
 		final MangoConfig config = MangoConfigFactory.load();
-		final DataSourceExtension ds = config.ext().datasource();
 
 		System.out.println(config.config());
 				
@@ -31,7 +34,7 @@ public class MangoConfigTest {
 			props.setProperty("datasources.default.url", urls[i % urls.length]);
 			config.override(ConfigFactory.parseProperties(props));
 
-			final Connection con = ds.datasource().getConnection();
+			final Connection con = config.datasource().getConnection();
 			final PreparedStatement stmt = con.prepareStatement("select * from test");
 
 			stmt.execute();
@@ -47,15 +50,13 @@ public class MangoConfigTest {
 		
 	}
 
-	@Test
 	public void testMangoConfig2() throws SQLException, InterruptedException {
 		final MangoConfig config = MangoConfigFactory.load();
-		final DataSourceExtension ds = config.ext().datasource();
 
 		System.out.println(config.config());
 						
 		for(int i = 0; i < 24; ++i) {
-			final Connection con = ds.datasource().getConnection();
+			final Connection con = config.datasource().getConnection();
 			final PreparedStatement stmt = con.prepareStatement("select * from test");
 
 			stmt.execute();

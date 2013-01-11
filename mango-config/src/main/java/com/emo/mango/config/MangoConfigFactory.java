@@ -8,8 +8,7 @@ public class MangoConfigFactory {
 		return new MangoConfigImpl("mango",
 			RootDirectoryStrategy.SystemAndUserDirectories,
 			ConfigDirectoryStrategy.GroupArtifactRelease,
-			TrackingStrategy.ModificationTracking,
-			AvailableExtensions.DataSource);
+			TrackingStrategy.ModificationTracking);
 	}
 	
 	public MangoConfig config() {

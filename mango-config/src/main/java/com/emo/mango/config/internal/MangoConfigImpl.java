@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.emo.mango.config.AvailableExtensions;
+import javax.sql.DataSource;
+
 import com.emo.mango.config.ConfigDirectoryStrategy;
-import com.emo.mango.config.DefaultExtensions;
-import com.emo.mango.config.Extension;
 import com.emo.mango.config.MangoConfig;
 import com.emo.mango.config.PathFinder;
 import com.emo.mango.config.RootDirectoryStrategy;
@@ -24,28 +23,40 @@ public class MangoConfigImpl implements MangoConfig {
 		
 	private final List<Extension> notifiers = new LinkedList<Extension>();
 
-	private final DefaultExtensionsImpl ext = new DefaultExtensionsImpl();
+	private final DataSourceExtension datasource;
 
-	public MangoConfigImpl(final String name, final RootDirectoryStrategy rootDirectoryStrategy, final ConfigDirectoryStrategy configDirectoryStrategy, final TrackingStrategy trackingStrategy, final AvailableExtensions... extensions) {
+	public MangoConfigImpl(final String name, final RootDirectoryStrategy rootDirectoryStrategy, final ConfigDirectoryStrategy configDirectoryStrategy, final TrackingStrategy trackingStrategy) {
 		pathFinder = rootDirectoryStrategy.strategy().factory().get(name, configDirectoryStrategy.strategy().naming());
+		
 		loadConfiguration();
 		
-		for (final AvailableExtensions extension : extensions) {
-			newExtension(extension.factory().extension(this.ext));
-		}
+		datasource = new DataSourceExtension();
+		newExtension(datasource);
 		
 		if(trackingStrategy == TrackingStrategy.ModificationTracking) {
 			ModificationTracker.get.subscribe(this, pathFinder.paths());
 		}
 	}
 
+	@Override
 	public Config config() {
 		return config;
 	}
 
+	@Override
 	public void override(final Config config) {
 		this.config = config.withFallback(this.config);
 		notifyExtensions();
+	}
+	
+	@Override
+	public DataSource datasource() {
+		return datasource.datasource();
+	}
+	
+	@Override
+	public DataSource datasource(final String name) {
+		return datasource.datasource(name);
 	}
 	
 	protected void loadConfiguration() {
@@ -95,18 +106,14 @@ public class MangoConfigImpl implements MangoConfig {
 		}
 	}
 	
-	public void notifyExtensions() {
+	private void notifyExtensions() {
 		for (final Extension notifier : notifiers) {
 			notifier.onConfigurationChanged(this.config);
 		}
 	}
 
-	public void newExtension(Extension notifier) {
+	private void newExtension(Extension notifier) {
 		notifiers.add(notifier);
 		notifier.onConfigurationChanged(config);
-	}
-	
-	public DefaultExtensions ext() {
-		return ext;
 	}
 }

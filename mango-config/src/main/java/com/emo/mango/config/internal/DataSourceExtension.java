@@ -1,4 +1,4 @@
-package com.emo.mango.config;
+package com.emo.mango.config.internal;
 
 import java.sql.SQLException;
 import java.util.HashMap;

@@ -30,7 +30,7 @@ import com.emo.skeleton.framework.ViewManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:applicationContext-init.xml")
-@ActiveProfiles(profiles = "production")
+@ActiveProfiles(profiles = "dev")
 @TransactionConfiguration(defaultRollback = false)
 public class AccountTest {
 

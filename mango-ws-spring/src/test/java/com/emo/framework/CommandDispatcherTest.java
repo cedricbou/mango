@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -12,6 +13,7 @@ import com.emo.skeleton.framework.CommandDispatcher;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:applicationContext-init.xml")
+@ActiveProfiles(profiles = "dev")
 public class CommandDispatcherTest {
 	
 	@Inject

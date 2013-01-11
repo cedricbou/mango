@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:mango="http://www.emodroid.com/mango/spring/schema/config"
+    xmlns:mango="http://www.emodroid.com/mango/schema/spring"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-            http://www.emodroid.com/mango/spring/schema/config http://www.emodroid.com/mango/spring/schema/config-1.0.xsd">
+            http://www.emodroid.com/mango/schema/spring http://www.emodroid.com/mango/schema/mango-spring-1.0.xsd">
 
 	<mango:config />
-	<mango:datasource id="toto" />
+	<mango:datasource id="toto">
+		<mango:script location="classpath:schema-mysql.sql" />
+	</mango:datasource>
     
 </beans>

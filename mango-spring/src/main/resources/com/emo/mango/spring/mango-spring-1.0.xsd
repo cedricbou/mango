@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://www.emodroid.com/mango/schema/spring"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+	targetNamespace="http://www.emodroid.com/mango/schema/spring">
+
+	<xs:element name="config">
+		<xs:complexType>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="datasource">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" maxOccurs="unbounded" name="script">
+					<xs:complexType>
+						<xs:attribute use="required" name="location" type="xs:string" />
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+
+			<xs:attribute name="datasource" type="xs:string" />
+			<xs:attribute name="id" use="required" type="xs:ID" />
+		</xs:complexType>
+	</xs:element>
+
+
+</xs:schema>

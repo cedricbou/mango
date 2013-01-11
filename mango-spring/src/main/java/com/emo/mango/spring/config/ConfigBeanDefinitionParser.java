@@ -7,13 +7,10 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
 
-import com.emo.mango.config.DefaultExtensions;
 import com.emo.mango.config.MangoConfig;
 import com.emo.mango.config.MangoConfigFactory;
 
 public class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
-
-	public static String EXTENSION_BEAN_NAME = DefaultExtensions.class.getName();
 
 	@Override
 	public AbstractBeanDefinition parseInternal(Element element,
@@ -37,16 +34,7 @@ public class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
 				configBeanBuilder.getBeanDefinition(),
 				MangoConfig.class.getName());
 		registerBeanDefinition(configHolder, context.getRegistry());
-
-		BeanDefinitionBuilder extensionsBeanBuilder = BeanDefinitionBuilder
-				.genericBeanDefinition(DefaultExtensions.class);
-		extensionsBeanBuilder.getRawBeanDefinition().setFactoryBeanName(configHolder.getBeanName());
-		extensionsBeanBuilder.setFactoryMethod("ext");
-
-		final BeanDefinitionHolder extensionHolder = new BeanDefinitionHolder(extensionsBeanBuilder.getBeanDefinition(), EXTENSION_BEAN_NAME);
 				
-		registerBeanDefinition(extensionHolder, context.getRegistry());
-		
 		return null;
 	}
 }
