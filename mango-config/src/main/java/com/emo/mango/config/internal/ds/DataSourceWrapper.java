@@ -3,10 +3,8 @@ package com.emo.mango.config.internal.ds;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -30,11 +28,6 @@ public class DataSourceWrapper implements DataSource {
 	@Override
 	public int getLoginTimeout() throws SQLException {
 		return ds.getLoginTimeout();
-	}
-
-	@Override
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		return ds.getParentLogger();
 	}
 
 	@Override

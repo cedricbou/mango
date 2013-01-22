@@ -5,6 +5,27 @@
 
 	<xs:element name="config">
 		<xs:complexType>
+			<xs:attribute name="id" use="optional" type="xs:ID" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:simpleType name="validatorType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="NONE" />
+			<xs:enumeration value="OVAL" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:element name="validator">
+		<xs:complexType>
+			<xs:attribute name="id" use="optional" type="xs:ID" />
+			<xs:attribute name="type" use="optional" type="validatorType" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="web">
+		<xs:complexType>
+			<xs:attribute name="with-validator" use="optional" type="xs:string" />
 		</xs:complexType>
 	</xs:element>
 
@@ -23,5 +44,10 @@
 		</xs:complexType>
 	</xs:element>
 
+	<xs:element name="cqs">
+		<xs:complexType>
+			<xs:attribute name="id" use="optional" type="xs:ID" />
+		</xs:complexType>
+	</xs:element>
 
 </xs:schema>

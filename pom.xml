@@ -16,6 +16,7 @@
 		<module>mango-cqs</module>
 		<module>mango-spring</module>
 		<module>mango-ws-spring</module>
+		<module>mango-validation</module>
 	</modules>
 
 	<properties>
@@ -23,6 +24,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<java.home>${JAVA6_HOME}</java.home>
 	</properties>
 
 	<build>
@@ -36,6 +38,9 @@
 					<target>${maven.compiler.target}</target>
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
+					<compilerArguments>
+						<bootclasspath>${java.home}\lib\rt.jar</bootclasspath>
+					</compilerArguments>
 				</configuration>
 			</plugin>
 

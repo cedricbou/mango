@@ -22,7 +22,7 @@ public class VersionProperties {
 	private final static Properties versionProps() {
 		final Properties props = new Properties();
 		try {
-			final InputStream inProps = ClassLoader.getSystemResourceAsStream(VERSION_PROPERTY_FILE);
+			final InputStream inProps = VersionProperties.class.getClassLoader().getResourceAsStream(VERSION_PROPERTY_FILE);
 			
 			if(inProps == null) {
 				throw new RuntimeException("no version.properties file found in classpath");
