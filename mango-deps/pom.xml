@@ -16,7 +16,7 @@
 
 	<properties>
 		<spring.version>3.1.3.RELEASE</spring.version>
-		<jackson.version>1.9.9</jackson.version>
+		<jackson.version>2.1.1</jackson.version>
 	</properties>
 
 	<dependencies>
@@ -38,6 +38,13 @@
 			<artifactId>usertype.core</artifactId>
 			<version>3.0.0.CR3</version>
 		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+
 
 		<!-- databases -->
 		<dependency>
@@ -101,17 +108,17 @@
 
 		<!-- json -->
 		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
-		
+
 		<!-- validation -->
 		<dependency>
 			<groupId>net.sf.oval</groupId>
