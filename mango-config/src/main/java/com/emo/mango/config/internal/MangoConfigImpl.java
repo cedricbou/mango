@@ -24,9 +24,12 @@ public class MangoConfigImpl implements MangoConfig {
 	private final List<Extension> notifiers = new LinkedList<Extension>();
 
 	private final DataSourceExtension datasource;
+	
+	private final String profile;
 
-	public MangoConfigImpl(final String name, final RootDirectoryStrategy rootDirectoryStrategy, final ConfigDirectoryStrategy configDirectoryStrategy, final TrackingStrategy trackingStrategy) {
+	public MangoConfigImpl(final String profile, final String name, final RootDirectoryStrategy rootDirectoryStrategy, final ConfigDirectoryStrategy configDirectoryStrategy, final TrackingStrategy trackingStrategy) {
 		pathFinder = rootDirectoryStrategy.strategy().factory().get(name, configDirectoryStrategy.strategy().naming());
+		this.profile = profile;
 		
 		loadConfiguration();
 		
@@ -100,6 +103,10 @@ public class MangoConfigImpl implements MangoConfig {
 
 			newConfig = newConfig.withFallback(ConfigFactory.load());
 
+			if(profile != null && profile.length() > 0 && newConfig.hasPath(profile)) {
+				newConfig = newConfig.getConfig(profile).withFallback(newConfig);
+			}
+			
 			this.config = newConfig;
 
 			notifyExtensions();
