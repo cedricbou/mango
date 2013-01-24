@@ -77,7 +77,7 @@
 	</dependencies>
 	
 	<scm>
-		<developerConnection>scm:git:https://github.com/cedricbou/mango.git</developerConnection>
+		<developerConnection>scm:git:git@github.com:cedricbou/mango.git</developerConnection>
 	</scm>
 
 	<distributionManagement>
