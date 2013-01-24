@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>mango</groupId>
@@ -43,21 +44,35 @@
 				</configuration>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.2.2</version>
+			</plugin>
 		</plugins>
 
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ftp</artifactId>
+				<artifactId>wagon-webdav-jackrabbit</artifactId>
 				<version>2.2</version>
-			</extension>
-			<extension>
-				<groupId>commons-net</groupId>
-				<artifactId>commons-net</artifactId>
-				<version>2.0</version>
 			</extension>
 		</extensions>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>emodroid-cloudbees-snapshot</id>
+			<name>emodroid-cloudbees-snapshot</name>
+			<url>https://repository-emodroid.forge.cloudbees.com/snapshot/</url>
+		</repository>
+
+		<repository>
+			<id>emodroid-cloudbees-release</id>
+			<name>emodroid-cloudbees-release</name>
+			<url>https://repository-emodroid.forge.cloudbees.com/release/</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -82,11 +97,16 @@
 	</scm>
 
 	<distributionManagement>
+		<downloadUrl>https://github.com/cedricbou/mango</downloadUrl>
 		<repository>
-			<id>ftp-repo</id>
-			<name>Maven Repository Emodroid</name>
-			<url>ftp://emodroid.com/repository</url>
-			<uniqueVersion>false</uniqueVersion>
+			<id>emodroid-cloudbees-release</id>
+			<name>emodroid-cloudbees-release</name>
+			<url>dav:https://repository-emodroid.forge.cloudbees.com/release/</url>
 		</repository>
+		<snapshotRepository>
+			<id>emodroid-cloudbees-release</id>
+			<name>emodroid-cloudbees-release</name>
+			<url>dav:https://repository-emodroid.forge.cloudbees.com/snapshot/</url>
+		</snapshotRepository>
 	</distributionManagement>
 </project>
