@@ -42,6 +42,9 @@ public class ProcessQueryController {
 		
 		final List<Object> values = new LinkedList<Object>();
 		
+		final String sPage = request.getParameter("_page");
+		final String sPerPage = request.getParameter("_perPage");
+		
 		for(final String param : executor.getParams()) {
 			final Object value = (Object)request.getParameter(param);
 			
@@ -51,10 +54,74 @@ public class ProcessQueryController {
 			
 			values.add(value);
 		}
+
+		if(sPage != null) {
+			final int perPage;
+			if(sPerPage == null) {
+				perPage = 20;
+			}
+			else {
+				perPage = Integer.parseInt(sPerPage);
+			}
+			
+			final int page = Integer.parseInt(sPage);
+			
+			return (List<Object>)executor.pagedQuery(page, perPage, values.toArray());
+		}
+		else {
+			return (List<Object>)executor.query(values.toArray());
+		}
+	}
+
+	@RequestMapping(value = "/{queryName}/count", method = RequestMethod.GET)
+	@ResponseBody
+	public final long countItems(final @PathVariable("queryName") String queryName, final HttpServletRequest request) throws DuplicateException {
+		QueryExecutor<?> executor = cqs.system().queryExecutor(queryName);
 		
-		return (List<Object>)executor.query(values.toArray());
+		if(executor == null) {
+			throw new IllegalArgumentException("no query with name " + queryName);
+		}
+		
+		final List<Object> values = new LinkedList<Object>();
+				
+		for(final String param : executor.getParams()) {
+			final Object value = (Object)request.getParameter(param);
+			
+			if(null == value) {
+				throw new IllegalArgumentException("missing query parameter " + param);
+			}
+			
+			values.add(value);
+		}
+
+		return executor.countItems(values.toArray());
 	}
 	
+	@RequestMapping(value = "/{queryName}/pages", method = RequestMethod.GET)
+	@ResponseBody
+	public final int countPages(final @PathVariable("queryName") String queryName, final HttpServletRequest request) throws DuplicateException {
+		QueryExecutor<?> executor = cqs.system().queryExecutor(queryName);
+		
+		if(executor == null) {
+			throw new IllegalArgumentException("no query with name " + queryName);
+		}
+		
+		final List<Object> values = new LinkedList<Object>();
+				
+		for(final String param : executor.getParams()) {
+			final Object value = (Object)request.getParameter(param);
+			
+			if(null == value) {
+				throw new IllegalArgumentException("missing query parameter " + param);
+			}
+			
+			values.add(value);
+		}
+
+		final int perPage = Integer.parseInt(request.getParameter("_perPage"));
+		
+		return executor.countPages(perPage, values.toArray());
+	}
 	
 	@RequestMapping(value = "/{queryName}/view", method = RequestMethod.GET, produces = "text/html")
 	@ResponseBody
