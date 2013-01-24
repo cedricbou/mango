@@ -11,13 +11,13 @@ import net.minidev.json.JSONValue;
 
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.spring.injection.annot.SpringBean;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import com.emo.mango.cqs.Command;
 import com.emo.skeleton.api.CommandApi;
 import com.emo.skeleton.framework.CQSFactory;
 import com.emo.skeleton.framework.ViewManager;
 import com.emo.skeleton.web.ui.CommandOrQueryListPanel.CommandEntry;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("serial")
 public class HomePage extends WebPage {

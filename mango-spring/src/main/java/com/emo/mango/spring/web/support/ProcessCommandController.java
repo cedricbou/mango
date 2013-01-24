@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.emo.mango.cqs.DuplicateCommandException;
+import com.emo.mango.cqs.DuplicateException;
 import com.emo.mango.spring.cqs.support.MangoCQS;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -43,7 +43,7 @@ public class ProcessCommandController {
 		
 	@RequestMapping(value = "/{commandName}", method = RequestMethod.POST)
 	@ResponseBody
-	public final String processCommand(final @PathVariable("commandName") String commandName, final HttpServletRequest req) throws JsonParseException, JsonMappingException, IOException, DuplicateCommandException {
+	public final String processCommand(final @PathVariable("commandName") String commandName, final HttpServletRequest req) throws JsonParseException, JsonMappingException, IOException, DuplicateException {
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 
 		final ObjectMapper mapper = new ObjectMapper();
@@ -65,7 +65,7 @@ public class ProcessCommandController {
 	@RequestMapping(value = "/batch", method = RequestMethod.POST)
 	@ResponseBody
 	protected final String processCommands(HttpServletRequest req)
-			throws IOException, DuplicateCommandException {
+			throws IOException, DuplicateException {
 		
 		final ObjectMapper mapper = new ObjectMapper();
 		final List<CommandHolder> holders = mapper.readValue(req.getInputStream(), new TypeReference<List<CommandHolder>>() {});
@@ -96,7 +96,7 @@ public class ProcessCommandController {
 	
 	@RequestMapping(value = "/{commandName}", method = RequestMethod.GET, produces = "text/html")
 	@ResponseBody
-	public final String displayCommand(final @PathVariable("commandName") String commandName, UriComponentsBuilder builder) throws IOException, DuplicateCommandException {
+	public final String displayCommand(final @PathVariable("commandName") String commandName, UriComponentsBuilder builder) throws IOException, DuplicateException {
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 
 		final InputStream is = this.getClass().getResourceAsStream("commandui.html");  
@@ -120,7 +120,7 @@ public class ProcessCommandController {
 
 	@RequestMapping(value = "/{commandName}/schema", method = RequestMethod.GET)
 	@ResponseBody
-	public final String schemaCommand(final @PathVariable("commandName") String commandName) throws JsonMappingException, DuplicateCommandException {
+	public final String schemaCommand(final @PathVariable("commandName") String commandName) throws JsonMappingException, DuplicateException {
 
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 		

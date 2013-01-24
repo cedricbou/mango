@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.emo.mango.cqs.Command;
-import com.emo.mango.cqs.DuplicateCommandException;
+import com.emo.mango.cqs.DuplicateException;
 import com.emo.mango.cqs.Handler;
 
 public class HandlerRepository {
@@ -44,13 +44,13 @@ public class HandlerRepository {
 		return commands.toArray(new Command<?>[] {});
 	}
 	
-	public Command<?> handledCommandByName(final String name) throws DuplicateCommandException {
+	public Command<?> handledCommandByName(final String name) throws DuplicateException {
 		if(!commandByName.containsKey(name.toLowerCase()) || commandByName.get(name.toLowerCase()).size() == 0) {
 			throw new IllegalArgumentException("no command with this name " + name);
 		}
 		
 		if(commandByName.get(name.toLowerCase()).size() > 1) {
-			throw new DuplicateCommandException("several commands with the same name exists, expected one. (" + name + ")");
+			throw new DuplicateException("several commands with the same name exists, expected one. (" + name + ")");
 		}
 		
 		return commandByName.get(name.toLowerCase()).get(0);

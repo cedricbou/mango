@@ -7,6 +7,7 @@ import org.w3c.dom.Element;
 
 import com.emo.mango.spring.cqs.support.MangoCommandHandlerScanner;
 import com.emo.mango.spring.cqs.support.MangoCQS;
+import com.emo.mango.spring.jpa.support.MangoQueryWithJpaScanner;
 import com.emo.mango.spring.support.MangoBeanDefinitionParser;
 
 public class CqsBeanDefinitionParser extends MangoBeanDefinitionParser {
@@ -21,7 +22,13 @@ public class CqsBeanDefinitionParser extends MangoBeanDefinitionParser {
 		final BeanDefinitionBuilder handlerScannerBeanBuilder = BeanDefinitionBuilder
 				.genericBeanDefinition(MangoCommandHandlerScanner.class);
 
+		// TODO : make this optional with something like <mango:cqs with-jpa="false" />
+		final BeanDefinitionBuilder queryWithJpaScannerBeanBuilder = BeanDefinitionBuilder
+				.genericBeanDefinition(MangoQueryWithJpaScanner.class);
+
 		registerBeanDefinitionWithNameBasedOnClass(handlerScannerBeanBuilder, context);
+
+		registerBeanDefinitionWithNameBasedOnClass(queryWithJpaScannerBeanBuilder, context);
 
 		registerBeanDefinitionWithNameFallbackToNameBasedOnClass(cqsFactoryBeanBuilder, id, context);
 		

@@ -9,20 +9,20 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.emo.mango.cqs.DuplicateCommandException;
+import com.emo.mango.cqs.DuplicateException;
 import com.emo.skeleton.framework.CQSFactory;
 import com.emo.skeleton.framework.CommandDispatcher;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 @RequestMapping("/commands")
@@ -36,7 +36,7 @@ public class ProcessCommandController {
 	
 	@RequestMapping(value = "/{commandName}", method = RequestMethod.POST)
 	@ResponseBody
-	public final String processCommand(final @PathVariable("commandName") String commandName, final HttpServletRequest req) throws JsonParseException, JsonMappingException, IOException, DuplicateCommandException {
+	public final String processCommand(final @PathVariable("commandName") String commandName, final HttpServletRequest req) throws JsonParseException, JsonMappingException, IOException, DuplicateException {
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 
 		final ObjectMapper mapper = new ObjectMapper();
@@ -56,7 +56,7 @@ public class ProcessCommandController {
 	@RequestMapping(value = "/batch", method = RequestMethod.POST)
 	@ResponseBody
 	protected final String processCommands(HttpServletRequest req)
-			throws IOException, DuplicateCommandException {
+			throws IOException, DuplicateException {
 		
 		final ObjectMapper mapper = new ObjectMapper();
 		final List<CommandHolder> holders = mapper.readValue(req.getInputStream(), new TypeReference<List<CommandHolder>>() {});
@@ -68,7 +68,8 @@ public class ProcessCommandController {
 		while(it.hasNext()) {
 			CommandHolder commandHolder = it.next();
 			final Class<?> commandType = cqs.system().command(commandHolder.type).clazz;
-			commands.add(mapper.readValue(commandHolder.command, commandType));
+			commands.add(mapper.readValue(
+					commandHolder.command.toString(), commandType));
 		}
 		
 		for(final Object command : commands) {
@@ -81,7 +82,7 @@ public class ProcessCommandController {
 	
 	@RequestMapping(value = "/{commandName}", method = RequestMethod.GET)
 	@ResponseBody
-	public final List<String> displayCommand(final @PathVariable("commandName") String commandName) throws DuplicateCommandException {
+	public final List<String> displayCommand(final @PathVariable("commandName") String commandName) throws DuplicateException {
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 
 		final Method[] methods = commandType.getMethods();

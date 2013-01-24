@@ -1,11 +1,11 @@
 package com.emo.mango.validation;
 import java.util.List;
 
-import org.codehaus.jackson.map.ObjectMapper;
-
 import net.sf.oval.ConstraintViolation;
 import net.sf.oval.Validator;
 import net.sf.oval.exception.ConstraintsViolatedException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class MangoValidationUtils {
