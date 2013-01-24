@@ -45,7 +45,7 @@
 			</plugin>
 
 		</plugins>
-		
+
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -75,8 +75,10 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<scm>
+		<connection>scm:git:git@github.com:cedricbou/mango.git</connection>
+		<url>http://github.com/cedricbou/mango</url>
 		<developerConnection>scm:git:git@github.com:cedricbou/mango.git</developerConnection>
 	</scm>
 
