@@ -27,6 +27,11 @@ public class MangoConfigImpl implements MangoConfig {
 	
 	private final String profile;
 
+	/*
+	 * @startuml
+	 * testdot
+	 * @enduml
+	 */
 	public MangoConfigImpl(final String profile, final String name, final RootDirectoryStrategy rootDirectoryStrategy, final ConfigDirectoryStrategy configDirectoryStrategy, final TrackingStrategy trackingStrategy) {
 		pathFinder = rootDirectoryStrategy.strategy().factory().get(name, configDirectoryStrategy.strategy().naming());
 		this.profile = profile;
