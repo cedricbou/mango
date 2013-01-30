@@ -6,7 +6,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
 
 import com.emo.mango.config.MangoConfig;
-import com.emo.mango.config.MangoConfigFactory;
+import com.emo.mango.config.MangoConfigs;
 import com.emo.mango.spring.support.MangoBeanDefinitionParser;
 
 public class ConfigBeanDefinitionParser extends MangoBeanDefinitionParser {
@@ -16,7 +16,8 @@ public class ConfigBeanDefinitionParser extends MangoBeanDefinitionParser {
 			Element element, ParserContext context) {
 
 		final BeanDefinitionBuilder configFactoryBeanBuilder = BeanDefinitionBuilder
-				.genericBeanDefinition(MangoConfigFactory.class);
+				.genericBeanDefinition(MangoConfigs.class);
+		configFactoryBeanBuilder.setFactoryMethod("singleton");
 
 		registerBeanDefinitionWithNameBasedOnClass(configFactoryBeanBuilder, context);
 		
@@ -25,7 +26,7 @@ public class ConfigBeanDefinitionParser extends MangoBeanDefinitionParser {
 
 		configBeanBuilder.getRawBeanDefinition().setFactoryBeanName(
 				getNameBasedOnClass(configFactoryBeanBuilder));
-		configBeanBuilder.getRawBeanDefinition().setFactoryMethodName("config");
+		configBeanBuilder.getRawBeanDefinition().setFactoryMethodName("get");
 
 		registerBeanDefinitionWithNameFallbackToNameBasedOnClass(configBeanBuilder, userDefinedId, context);
 		

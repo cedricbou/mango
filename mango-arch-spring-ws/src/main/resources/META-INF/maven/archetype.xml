@@ -1,10 +1,31 @@
-<archetype xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype/1.0.0 http://maven.apache.org/xsd/archetype-1.0.0.xsd">
-  <id>quickstart</id>
-  <sources>
-    <source>src/main/java/App.java</source>
-  </sources>
-  <testSources>
-    <source>src/test/java/AppTest.java</source>
-  </testSources>
+<archetype
+	xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype/1.0.0 http://maven.apache.org/xsd/archetype-1.0.0.xsd">
+	
+	<id>quickstart</id>
+	
+	<sources>
+		<source>src/main/java/application/roshambo/PlayGame.java</source>
+		<source>src/main/java/domain/roshambo/Game.java</source>
+		<source>src/main/java/domain/roshambo/Games.java</source>
+		<source>src/main/java/domain/roshambo/Round.java</source>
+		<source>src/main/java/domain/roshambo/Rounds.java</source>
+		<source>src/main/java/domain/roshambo/PartyName.java</source>
+		<source>src/main/java/domain/roshambo/PlayerName.java</source>
+		<source>src/main/java/domain/roshambo/Gesture.java</source>
+		<source>src/main/java/queries/roshambo/PlayedRoundQuery.java</source>
+		<source>src/main/java/queries/roshambo/PlayedRoundQueryExecutor.java</source>
+	</sources>
+
+	<resources>
+		<resource>src/main/resources/application.conf</resource>
+		<resource>src/main/resources/applicationContext-custom.xml</resource>
+		<resource>src/main/resources/applicationContext-init.xml</resource>
+		<resource>src/main/resources/version.properties</resource>
+	</resources>
+
+	<testSources>
+	<source>src/test/java/integration/roshambo/GameIntegration.java</source>
+	</testSources>
 </archetype>

@@ -12,7 +12,7 @@ import com.emo.mango.config.internal.ds.DataSourceWrapper;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
-public class DataSourceExtension implements Extension {
+public class DataSourceExtension {
 
 	private Config config = ConfigFactory.empty();
 
@@ -22,7 +22,6 @@ public class DataSourceExtension implements Extension {
 		super();
 	}
 
-	@Override
 	public void onConfigurationChanged(Config config) {
 		final Config formerConfig = this.config;
 
@@ -80,6 +79,7 @@ public class DataSourceExtension implements Extension {
 	private static void configureDataSource(final BasicDataSource ds,
 			final Config config) {
 		ds.setUrl(config.getString("url"));
+		// FIXME : it is possible to only set an URL with JDBC.
 		ds.setUsername(config.getString("user"));
 		ds.setPassword(config.getString("password"));
 		ds.setDriverClassName(com.mysql.jdbc.Driver.class.getName());

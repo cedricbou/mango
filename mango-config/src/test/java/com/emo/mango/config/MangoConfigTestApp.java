@@ -19,7 +19,7 @@ public class MangoConfigTestApp {
 	
 
 	public void testMangoConfig() throws SQLException {
-		final MangoConfig config = MangoConfigFactory.load();
+		final MangoConfig config = MangoConfigs.singleton().get();
 
 		System.out.println(config.config());
 				
@@ -51,7 +51,7 @@ public class MangoConfigTestApp {
 	}
 
 	public void testMangoConfig2() throws SQLException, InterruptedException {
-		final MangoConfig config = MangoConfigFactory.load();
+		final MangoConfig config = MangoConfigs.singleton().get();
 
 		System.out.println(config.config());
 						

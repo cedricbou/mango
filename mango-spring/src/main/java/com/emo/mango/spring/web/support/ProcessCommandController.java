@@ -99,12 +99,15 @@ public class ProcessCommandController {
 	public final String displayCommand(final @PathVariable("commandName") String commandName, UriComponentsBuilder builder) throws IOException, DuplicateException {
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 
+		final String baseURI = builder.path("").build().toUri().toString();
+		
 		final InputStream is = this.getClass().getResourceAsStream("commandui.html");  
 		final String rawHtml = IOUtils.toString(is);
 		is.close();
 
 		final String modifiedHtml = 
-			rawHtml.replaceAll("##command##", commandType.getName())
+			rawHtml.replaceAll("##base##", baseURI)
+				.replaceAll("##command##", commandType.getName())
 				.replaceAll("##command_url##", builder.path("/commands/{commandName}").buildAndExpand(commandName).toUri().toString())
 				.replaceAll("##schema_url##", builder.path("/schema").buildAndExpand(commandName).toUri().toString());
 		
