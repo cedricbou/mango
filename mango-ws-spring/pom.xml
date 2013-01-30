@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>mango</groupId>
 		<artifactId>mango</artifactId>
-		<version>1.0.4-SNAPSHOT</version>
+		<version>1.0.4</version>
 	</parent>
 
 	<properties>
@@ -238,25 +238,25 @@
 		<dependency>
 			<groupId>mango</groupId>
 			<artifactId>mango-cqs</artifactId>
-			<version>1.0.4-SNAPSHOT</version>
+			<version>1.0.4</version>
 		</dependency>
 
 		<dependency>
 			<groupId>mango</groupId>
 			<artifactId>mango-spring</artifactId>
-			<version>1.0.4-SNAPSHOT</version>
+			<version>1.0.4</version>
 		</dependency>
 
 		<dependency>
 			<groupId>mango</groupId>
 			<artifactId>mango-config</artifactId>
-			<version>1.0.4-SNAPSHOT</version>
+			<version>1.0.4</version>
 		</dependency>
 
 		<dependency>
 			<groupId>mango</groupId>
 			<artifactId>mango-deps</artifactId>
-			<version>1.0.4-SNAPSHOT</version>
+			<version>1.0.4</version>
 			<type>pom</type>
 		</dependency>
 		
