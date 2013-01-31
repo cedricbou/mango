@@ -12,7 +12,8 @@ import org.springframework.context.ApplicationContextAware;
 import com.emo.mango.cqs.QueryExecutor;
 import com.emo.mango.cqs.QueryItem;
 import com.emo.mango.spring.cqs.support.MangoCQS;
-import com.emo.mango.spring.jpa.annotations.QueryWithJpa;
+import com.emo.mango.spring.jpa.annotations.Jpql;
+import com.emo.mango.spring.jpa.annotations.QueryParams;
 
 public class MangoQueryWithJpaScanner implements ApplicationContextAware,
 		InitializingBean {
@@ -33,18 +34,20 @@ public class MangoQueryWithJpaScanner implements ApplicationContextAware,
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void scanForQueriesWithJpa() {
 		final Map<String, Object> myQueries = applicationContext
-				.getBeansWithAnnotation(QueryWithJpa.class);
+				.getBeansWithAnnotation(Jpql.class);
 
 		for (final String beanName : myQueries.keySet()) {
-			final QueryWithJpa annotation = applicationContext
-					.findAnnotationOnBean(beanName, QueryWithJpa.class);
+			final Jpql annotation = applicationContext
+					.findAnnotationOnBean(beanName, Jpql.class);
 
 			final Object myQuery = myQueries.get(beanName);
 
 			if (myQuery instanceof QueryExecutor<?>) {
-				final QueryWithJpaExecutor executor = (QueryWithJpaExecutor)myQuery;
-				executor.setJpql(annotation.jpql());
-				declareQuery(annotation.value(), executor);
+				final JpqlExecutor executor = (JpqlExecutor)myQuery;
+				final QueryParams queryParam = executor.getClass().getAnnotation(QueryParams.class);
+				executor.setData(annotation.jpql(), ((queryParam != null)?queryParam.value():null), annotation.clazz());
+				// TODO : a query should be declarable from the name as well, not only the class!
+				declareQuery(annotation.clazz(), executor);
 			}
 			else {
 				// TODO: add warning or error if CustomView not implementing ViewExecutor.
