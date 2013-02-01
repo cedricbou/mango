@@ -25,7 +25,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<java.home>${JAVA_HOME}</java.home>
 	</properties>
 
 	<build>
@@ -39,9 +38,6 @@
 					<target>${maven.compiler.target}</target>
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
-					<compilerArguments>
-						<bootclasspath>${java.home}\lib\rt.jar</bootclasspath>
-					</compilerArguments>
 				</configuration>
 			</plugin>
 
