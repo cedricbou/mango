@@ -1,4 +1,4 @@
-package com.emo.mango.spring.jpa.support;
+package com.emo.mango.spring.query.support;
 
 import java.util.Map;
 
@@ -12,10 +12,10 @@ import org.springframework.context.ApplicationContextAware;
 import com.emo.mango.cqs.QueryExecutor;
 import com.emo.mango.cqs.QueryItem;
 import com.emo.mango.spring.cqs.support.MangoCQS;
-import com.emo.mango.spring.jpa.annotations.Jpql;
-import com.emo.mango.spring.jpa.annotations.QueryParams;
+import com.emo.mango.spring.query.annotations.Jpql;
+import com.emo.mango.spring.query.annotations.QueryParams;
 
-public class MangoQueryWithJpaScanner implements ApplicationContextAware,
+public class MangoJpqlScanner implements ApplicationContextAware,
 		InitializingBean {
 	private ApplicationContext applicationContext;
 

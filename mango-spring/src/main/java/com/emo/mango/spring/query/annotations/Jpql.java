@@ -1,4 +1,4 @@
-package com.emo.mango.spring.jpa.annotations;
+package com.emo.mango.spring.query.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

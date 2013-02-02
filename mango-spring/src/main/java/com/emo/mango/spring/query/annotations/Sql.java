@@ -1,4 +1,4 @@
-package com.emo.mango.spring.jpa.annotations;
+package com.emo.mango.spring.query.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface QueryWithJpa {
-	Class<?> value();
-	String jpql();
+public @interface Sql {
+	String sql();
+	Class<?> clazz();
+	String name() default "";
 }
