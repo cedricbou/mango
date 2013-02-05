@@ -4,17 +4,17 @@ import com.emo.mango.cqs.CQSSystem;
 import com.emo.mango.cqs.QueryExecutor;
 import com.emo.mango.cqs.QueryItem;
 
-public class ExecuteQueryDsl<O> {
+public class ExecuteQueryDsl {
 
 	private final CQSSystem system;
-	private final QueryItem<O> query;
+	private final QueryItem query;
 	
-	protected ExecuteQueryDsl(final CQSSystem system, final QueryItem<O> query) {
+	protected ExecuteQueryDsl(final CQSSystem system, final QueryItem query) {
 		this.system = system;
 		this.query = query;
 	}
 	
-	public void with(final QueryExecutor<O> executor) {
+	public <O> void with(final QueryExecutor<O> executor) {
 		system.declareQueryExecutor(query, executor);
 	}
 }

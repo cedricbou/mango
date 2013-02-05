@@ -14,6 +14,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.StringUtils;
 
+import com.emo.mango.cqs.SearchValue;
+
 
 public abstract class SqlExecutor<Q> extends QueryBasedExecutor<Q> {
 
@@ -93,11 +95,11 @@ public abstract class SqlExecutor<Q> extends QueryBasedExecutor<Q> {
 	}
 	
 	@Override
-	protected List<Q> runPagedQuery(String selectQuery, int page, int elementsParPage, Object... values) {
+	protected List<Q> runPagedQuery(String selectQuery, int page, int elementsParPage, SearchValue values) {
 		if(selectQuery.contains("?")) {
-			final Object[] valuesWithLimit = new Object[values.length + 2];
-			for(int i = 0; i < values.length; ++i) {
-				valuesWithLimit[i] = values[i];
+			final Object[] valuesWithLimit = new Object[values.getValues().length + 2];
+			for(int i = 0; i < values.getValues().length; ++i) {
+				valuesWithLimit[i] = values.getValues()[i];
 			}
 			
 			valuesWithLimit[valuesWithLimit.length - 2] = (page - 1) * elementsParPage;
@@ -107,27 +109,30 @@ public abstract class SqlExecutor<Q> extends QueryBasedExecutor<Q> {
 		}
 		else {
 			final Map<String, Object> namedParams = new HashMap<String, Object>();
-			int i = 0;
-			for(final String param : getParams()) {
-				namedParams.put(param, values[i++]);
+
+			for(final String criteria : values.getCriteria()) {
+				namedParams.put(criteria, values.get(criteria));
 			}
+			
 			namedParams.put("offset", (page - 1) * elementsParPage);
 			namedParams.put("limit", elementsParPage);
+			
 			return namedTemplate.query(selectQuery, namedParams, mapper);
 		}
 	}
 
 	@Override
-	protected long runCountQuery(String countQuery, Object... values) {
+	protected long runCountQuery(String countQuery, SearchValue values) {
 		if(countQuery.contains("?")) {
-			return template.queryForLong(countQuery, values);
+			return template.queryForLong(countQuery, values.getValues());
 		}
 		else {
 			final Map<String, Object> namedParams = new HashMap<String, Object>();
-			int i = 0;
-			for(final String param : getParams()) {
-				namedParams.put(param, values[i++]);
+
+			for(final String criteria : values.getCriteria()) {
+				namedParams.put(criteria, values.get(criteria));
 			}
+
 			return namedTemplate.queryForLong(countQuery, namedParams);
 		}
 	}

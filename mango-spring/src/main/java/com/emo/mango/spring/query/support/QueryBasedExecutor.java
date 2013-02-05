@@ -5,9 +5,11 @@ import java.lang.reflect.Constructor;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.emo.mango.cqs.QueryExecutor;
+import com.emo.mango.cqs.AbstractQueryExecutor;
+import com.emo.mango.cqs.SearchCriteria;
+import com.emo.mango.cqs.SearchValue;
 
-abstract class QueryBasedExecutor<Q> implements QueryExecutor<Q> {
+abstract class QueryBasedExecutor<Q> extends AbstractQueryExecutor<Q> {
 
 	private String selectQuery;
 	
@@ -15,10 +17,10 @@ abstract class QueryBasedExecutor<Q> implements QueryExecutor<Q> {
 	
 	private Class<?> clazz;
 	
-	private String[] params = new String[] {};
-
-	protected final void setData(final String query, final String[] params,
-			final Class<?> clazz) {
+	private SearchCriteria searchCriteria;
+	
+	protected final void setData(final String query, final SearchCriteria searchCriteria, final Class<?> clazz) {
+		
 		if (!query.toLowerCase().startsWith("from")) {
 			throw new IllegalArgumentException(
 					"Query request must start with from");
@@ -26,11 +28,7 @@ abstract class QueryBasedExecutor<Q> implements QueryExecutor<Q> {
 		
 		this.clazz = clazz;
 
-		if (null == params) {
-			this.params = new String[] {};
-		} else {
-			this.params = params;
-		}
+		this.searchCriteria = searchCriteria;
 	
 		final Constructor<?>[] constrs = clazz.getConstructors();
 
@@ -72,23 +70,20 @@ abstract class QueryBasedExecutor<Q> implements QueryExecutor<Q> {
 	protected Class<?> getClazz() {
 		return this.clazz;
 	}
-	
+		
 	@Override
-	public final String[] getParams() {
-		return params;
+	public SearchCriteria getSearchCriteria() {
+		return searchCriteria;
 	}
 	
 	@Override
-	public final List<Q> query(Object... values) {
+	public final List<Q> query(final SearchValue values) {
 		return pagedQuery(1, 200, values);
 	}
-
+	
 	@Override
-	public final List<Q> pagedQuery(int page, int elementsParPage, Object... values) {
-		if (params.length != values.length) {
-			throw new IllegalArgumentException(
-					"number of values does not match number of declared params for this query");
-		}
+	public final List<Q> pagedQuery(int page, int elementsParPage, SearchValue values) {
+		values.assertMatch(searchCriteria);
 
 		if (page < 1) {
 			throw new IllegalArgumentException(
@@ -98,23 +93,20 @@ abstract class QueryBasedExecutor<Q> implements QueryExecutor<Q> {
 		return runPagedQuery(selectQuery, page, elementsParPage, values);
 	}
 	
-	protected abstract List<Q> runPagedQuery(String selectQuery, int page, int elementsParPage, Object... values);
+	protected abstract List<Q> runPagedQuery(String selectQuery, int page, int elementsParPage, SearchValue values);
 
-	protected abstract long runCountQuery(String countQuery, Object... values);
+	protected abstract long runCountQuery(String countQuery, SearchValue values);
 
 	@Override
-	public final int countPages(int elementsParPage, Object... values) {
+	public final int countPages(int elementsParPage, SearchValue values) {
 		final long itemCount = countItems(values);
 		return (int) (itemCount / elementsParPage)
 				+ (((itemCount % elementsParPage) > 0) ? 1 : 0);
 	}
 
 	@Override
-	public final long countItems(Object... values) {
-		if (params.length != values.length) {
-			throw new IllegalArgumentException(
-					"number of values does not match number of declared params for this query");
-		}
+	public final long countItems(SearchValue values) {
+		values.assertMatch(searchCriteria);
 
 		return runCountQuery(countQuery, values);
 	}

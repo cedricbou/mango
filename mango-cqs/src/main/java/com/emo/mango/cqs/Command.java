@@ -14,7 +14,7 @@ public class Command<O> {
 
 	@Override
 	public int hashCode() {
-		return (this.name.toLowerCase() + this.namespace.toLowerCase())
+		return (this.name.toLowerCase())
 				.hashCode();
 	}
 
@@ -22,9 +22,13 @@ public class Command<O> {
 	public boolean equals(Object o) {
 		if (o instanceof Command<?>) {
 			final Command<?> c = (Command<?>) o;
-			return this.name.equalsIgnoreCase(c.name)
-					&& this.namespace.equals(c.namespace);
+			return this.name.equalsIgnoreCase(c.name);
 		}
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return "{" + namespace + "}" + name;
 	}
 }

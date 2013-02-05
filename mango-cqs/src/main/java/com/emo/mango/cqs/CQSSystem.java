@@ -16,7 +16,7 @@ public class CQSSystem {
 		handlerRepository.addHandler(cmd, handler);
 	}
 	
-	public <O> void declareQueryExecutor(final QueryItem<O> query, final QueryExecutor<O> executor) {
+	public <O> void declareQueryExecutor(final QueryItem query, final QueryExecutor<O> executor) {
 		executorRepository.addExecutor(query, executor);
 	}
 	
@@ -32,7 +32,7 @@ public class CQSSystem {
 		return handlerRepository.handledCommandByName(name);
 	}
 
-	public QueryItem<?> query(final String name) throws DuplicateException {
+	public QueryItem query(final String name) throws DuplicateException {
 		return executorRepository.queryByName(name);
 	}
 
@@ -40,7 +40,7 @@ public class CQSSystem {
 		return queryExecutor(query(queryName));
 	}
 	
-	public QueryExecutor<?> queryExecutor(final QueryItem<?> query) throws DuplicateException {
+	public QueryExecutor<?> queryExecutor(final QueryItem query) throws DuplicateException {
 		return executorRepository.executorFor(query);
 	}
 }

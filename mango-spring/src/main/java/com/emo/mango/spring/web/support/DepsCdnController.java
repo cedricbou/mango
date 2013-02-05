@@ -42,6 +42,8 @@ public class DepsCdnController {
 		}
 		IOUtils.copy(is, response.getOutputStream());
 
+		is.close();
+		
 		response.flushBuffer();
 	}
 	

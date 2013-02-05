@@ -24,6 +24,10 @@ public class HandlerRepository {
 			throw new IllegalArgumentException("unexpected null handler");
 		}
 		
+		if(handlers.containsKey(command)) {
+			throw new IllegalArgumentException("a command with this name already exists. " + command);
+		}
+		
 		handlers.put(command, handler);
 		storeCommand(command);
 	}

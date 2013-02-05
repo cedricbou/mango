@@ -8,6 +8,8 @@ import javax.persistence.TypedQuery;
 
 import org.springframework.util.StringUtils;
 
+import com.emo.mango.cqs.SearchValue;
+
 
 public abstract class JpqlExecutor<Q> extends QueryBasedExecutor<Q> {
 
@@ -27,13 +29,13 @@ public abstract class JpqlExecutor<Q> extends QueryBasedExecutor<Q> {
 		return "select new java.lang.Long(count(*)) " + query;
 	}
 
-	private void completeQueryParams(final boolean withQuestionMark, final Query query, Object... values) {
+	private void completeQueryParams(final boolean withQuestionMark, final Query query, SearchValue values) {
 		int i = 0;
-		for (final String name : getParams()) {
+		for (final String name : values.getCriteria()) {
 			if (withQuestionMark) {
-				query.setParameter(i + 1, values[i]);
+				query.setParameter(i + 1, values.getValues()[i]);
 			} else {
-				query.setParameter(name, values[i]);
+				query.setParameter(name, values.get(name));
 			}
 			++i;
 		}
@@ -41,7 +43,7 @@ public abstract class JpqlExecutor<Q> extends QueryBasedExecutor<Q> {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected List<Q> runPagedQuery(String selectQuery, int page, int elementsParPage, Object... values) {
+	protected List<Q> runPagedQuery(String selectQuery, int page, int elementsParPage, SearchValue values) {
 		final Query query = entityManager().createQuery(selectQuery);
 		
 		completeQueryParams(selectQuery.contains("?"), query, values);
@@ -53,7 +55,7 @@ public abstract class JpqlExecutor<Q> extends QueryBasedExecutor<Q> {
 	}
 
 	@Override
-	protected long runCountQuery(String countQuery, Object... values) {
+	protected long runCountQuery(String countQuery, SearchValue values) {
 		final TypedQuery<Long> query = entityManager().createQuery(
 				countQuery, Long.class);
 

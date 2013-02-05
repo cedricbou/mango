@@ -16,7 +16,7 @@ public class InCqsDsl {
 		return new HandleCommandDsl<O>(system, cmd);
 	}
 	
-	public <O> ExecuteQueryDsl<O> execute(final QueryItem<O> query) {
-		return new ExecuteQueryDsl<O>(system, query);
+	public ExecuteQueryDsl execute(final QueryItem query) {
+		return new ExecuteQueryDsl(system, query);
 	}
 }

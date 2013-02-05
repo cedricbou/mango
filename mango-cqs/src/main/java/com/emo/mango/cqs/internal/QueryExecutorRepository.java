@@ -11,11 +11,11 @@ import com.emo.mango.cqs.QueryItem;
 
 public class QueryExecutorRepository {
 	
-	private final Map<QueryItem<?>, QueryExecutor<?>> executors = new HashMap<QueryItem<?>, QueryExecutor<?>>();
-	private final List<QueryItem<?>> queries = new LinkedList<QueryItem<?>>();
-	private final Map<String, List<QueryItem<?>>> queriesByName = new HashMap<String, List<QueryItem<?>>>();
+	private final Map<QueryItem, QueryExecutor<?>> executors = new HashMap<QueryItem, QueryExecutor<?>>();
+	private final List<QueryItem> queries = new LinkedList<QueryItem>();
+	private final Map<String, List<QueryItem>> queriesByName = new HashMap<String, List<QueryItem>>();
 	
-	public <O> void addExecutor(final QueryItem<O> query, final QueryExecutor<O> executor) {
+	public <O> void addExecutor(final QueryItem query, final QueryExecutor<O> executor) {
 		if(null == query) {
 			throw new IllegalArgumentException("unexpected null query item");
 		}
@@ -24,17 +24,21 @@ public class QueryExecutorRepository {
 			throw new IllegalArgumentException("unexpected null query executor");
 		}
 		
+		if(executors.containsKey(query)) {
+			throw new IllegalArgumentException("an executor with this name already exists. " + query);
+		}
+		
 		executors.put(query, executor);
 		storeQuery(query);
 	}
 	
-	private <O> void storeQuery(final QueryItem<O> queryItem) {
+	private <O> void storeQuery(final QueryItem queryItem) {
 		queries.add(queryItem);
 		
 		final String name = queryItem.name.toLowerCase();
 		
 		if(!queriesByName.containsKey(name)) {
-			queriesByName.put(name, new LinkedList<QueryItem<?>>());
+			queriesByName.put(name, new LinkedList<QueryItem>());
 		}
 		
 		queriesByName.get(name).add(queryItem);
@@ -58,7 +62,7 @@ public class QueryExecutorRepository {
 	}
 	*/
 	
-	public <O> QueryExecutor<O> executorFor(final QueryItem<O> query) {
+	public <O> QueryExecutor<O> executorFor(final QueryItem query) {
 		if(null == query) {
 			throw new IllegalArgumentException("unexpected null query item");
 		}
@@ -72,7 +76,7 @@ public class QueryExecutorRepository {
 		return castExecutorWith(query, executor);
 	}
 	
-	private <O> QueryExecutor<O> castExecutorWith(final QueryItem<O> query, final QueryExecutor<?> executor) {
+	private <O> QueryExecutor<O> castExecutorWith(final QueryItem query, final QueryExecutor<?> executor) {
 		try {
 			@SuppressWarnings("unchecked")
 			final QueryExecutor<O> mappedToExecutor = (QueryExecutor<O>)executor;
@@ -83,7 +87,7 @@ public class QueryExecutorRepository {
 		}
 	}
 
-	public QueryItem<?> queryByName(String name) throws DuplicateException {
+	public QueryItem queryByName(String name) throws DuplicateException {
 		if(!queriesByName.containsKey(name.toLowerCase()) || queriesByName.get(name.toLowerCase()).size() == 0) {
 			throw new IllegalArgumentException("no command with this name " + name);
 		}
