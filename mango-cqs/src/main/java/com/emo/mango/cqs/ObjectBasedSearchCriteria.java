@@ -12,8 +12,12 @@ import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
 public class ObjectBasedSearchCriteria implements SearchCriteria {
 
 	private final String[] criteria;
+	
+	public final Class<?> clazz;
 
 	public ObjectBasedSearchCriteria(final Class<?> clazz) {
+		this.clazz = clazz;
+		
 		final ObjectMapper mapper = new ObjectMapper();
 
 		try {

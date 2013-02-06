@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -94,8 +96,13 @@ public abstract class SqlExecutor<Q> extends QueryBasedExecutor<Q> {
 		}
 	}
 	
+	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+	
 	@Override
 	protected List<Q> runPagedQuery(String selectQuery, int page, int elementsParPage, SearchValue values) {
+		
+		LOG.debug("will run paged query '{}' and values {}", selectQuery, values);
+		
 		if(selectQuery.contains("?")) {
 			final Object[] valuesWithLimit = new Object[values.getValues().length + 2];
 			for(int i = 0; i < values.getValues().length; ++i) {

@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.oval.internal.util.StringUtils;
+
 import com.emo.mango.utils.ObjectReflectGetter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,5 +72,10 @@ public class ObjectBasedSearchValue implements SearchValue {
 				throw new IllegalArgumentException("Expected criteria '" + columns[i] + "' but got '" + this.criteria[i] + "'.");
 			}
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return StringUtils.implode(criteria, ";") + " // " + StringUtils.implode(values, ";");
 	}
 }
