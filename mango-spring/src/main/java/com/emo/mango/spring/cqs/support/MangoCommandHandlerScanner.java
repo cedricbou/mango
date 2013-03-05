@@ -2,10 +2,9 @@ package com.emo.mango.spring.cqs.support;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -17,7 +16,7 @@ public class MangoCommandHandlerScanner implements ApplicationContextAware,
 		InitializingBean {
 	private ApplicationContext applicationContext;
 
-	@Inject
+	@Autowired
 	private MangoCQS cqs;
 
 	@Override
@@ -41,7 +40,7 @@ public class MangoCommandHandlerScanner implements ApplicationContextAware,
 			final Object myHandler = myHandlers.get(beanName);
 
 			if (myHandler instanceof Handler<?>) {
-				declareCommand(annotation.value(), (Handler)myHandler);
+				declareCommand(annotation.command(), (Handler)myHandler);
 			}
 			else {
 				// TODO: add warning or error if CustomView not implementing ViewExecutor.

@@ -6,11 +6,12 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.io.ByteStreams;
 
 @Controller
 public class DepsCdnController {
@@ -40,7 +41,8 @@ public class DepsCdnController {
 		if(is == null) {
 			throw new IllegalAccessException("no such file " + root + "/" + relPath);
 		}
-		IOUtils.copy(is, response.getOutputStream());
+		
+		ByteStreams.copy(is, response.getOutputStream());
 
 		is.close();
 		

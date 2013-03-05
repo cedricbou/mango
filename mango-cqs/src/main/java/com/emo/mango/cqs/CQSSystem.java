@@ -1,23 +1,50 @@
 package com.emo.mango.cqs;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.sql.DataSource;
+
 import com.emo.mango.cqs.internal.HandlerRepository;
 import com.emo.mango.cqs.internal.InternalCommandBus;
+import com.emo.mango.cqs.internal.QueryExecutorFactory;
 import com.emo.mango.cqs.internal.QueryExecutorRepository;
 
 public class CQSSystem {
 	
 	private final HandlerRepository handlerRepository = new HandlerRepository();
 	
-	private final QueryExecutorRepository executorRepository = new QueryExecutorRepository();
+	private final QueryExecutorFactory queryExecutorFactory = new QueryExecutorFactory();
+	
+	private final QueryExecutorRepository queryExecutorRepository = new QueryExecutorRepository();
 	
 	private final CommandBus bus = new InternalCommandBus(handlerRepository);
 		
-	public <O> void declareHandler(final Command<O> cmd, final Handler<O> handler) {
-		handlerRepository.addHandler(cmd, handler);
+	public void declareQueries(final Class<? extends Queries> queriesClass, final DataSource ds, final EntityManager em) {
+		final List<QueryExecutor> qes = queryExecutorFactory.executorsFor(queriesClass, ds, em);
+		
+		for(final QueryExecutor qe : qes) {
+			queryExecutorRepository.store(qe);
+		}
+	}
+
+	public void declareQueries(final Class<? extends Queries> queriesClass, final EntityManager em) {
+		declareQueries(queriesClass, null, em);
+	}
+
+	public void declareQueries(final Class<? extends Queries> queriesClass) {
+		declareQueries(queriesClass, null, null);
+	}
+
+	public <I extends Queries> I open(Class<I> queriesClass,
+			DataSource dataSource,
+			EntityManager entityManager) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
-	public <O> void declareQueryExecutor(final QueryItem query, final QueryExecutor<O> executor) {
-		executorRepository.addExecutor(query, executor);
+	public <O> void declareHandler(final Command<O> cmd, final Handler<O> handler) {
+		handlerRepository.addHandler(cmd, handler);
 	}
 	
 	public CommandBus bus() {
@@ -32,15 +59,8 @@ public class CQSSystem {
 		return handlerRepository.handledCommandByName(name);
 	}
 
-	public QueryItem query(final String name) throws DuplicateException {
-		return executorRepository.queryByName(name);
+	public QueryExecutor getQueryExecutor(final String queryName) {
+		return queryExecutorRepository.get(queryName);
 	}
 
-	public QueryExecutor<?> queryExecutor(final String queryName) throws DuplicateException {
-		return queryExecutor(query(queryName));
-	}
-	
-	public QueryExecutor<?> queryExecutor(final QueryItem query) throws DuplicateException {
-		return executorRepository.executorFor(query);
-	}
 }

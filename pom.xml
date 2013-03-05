@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>mango</groupId>
 	<artifactId>mango</artifactId>
-	<version>1.0.8-SNAPSHOT</version>
+	<version>0.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>mango</name>
@@ -17,6 +18,7 @@
 		<module>mango-spring</module>
 		<module>mango-validation</module>
 		<module>mango-arch-spring-ws</module>
+		<module>mango-commons</module>
 	</modules>
 
 	<properties>
@@ -24,6 +26,15 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+
+		<deps.typesafe.config.version>1.0.0</deps.typesafe.config.version>
+		<deps.jodatime.version>2.1</deps.jodatime.version>
+		<deps.jdbi.version>2.45</deps.jdbi.version>
+		<deps.spring.version>3.2.1.RELEASE</deps.spring.version>
+		<deps.jackson.version>2.1.1</deps.jackson.version>
+		<deps.hibernate.version>4.1.1.Final</deps.hibernate.version>
+
+	
 	</properties>
 
 	<build>
@@ -84,6 +95,7 @@
 			<version>1.9.5-rc1</version>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<scm>

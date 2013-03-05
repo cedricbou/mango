@@ -46,8 +46,17 @@
 
 	<xs:element name="cqs">
 		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" maxOccurs="unbounded" name="query-scan">
+					<xs:complexType>
+						<xs:attribute use="required" name="package" type="xs:string" />
+						<xs:attribute name="with-datasource" type="xs:string" />
+						<xs:attribute name="with-entitymanager-provider" type="xs:string" />
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			
 			<xs:attribute name="id" use="optional" type="xs:ID" />
 		</xs:complexType>
 	</xs:element>
-
 </xs:schema>

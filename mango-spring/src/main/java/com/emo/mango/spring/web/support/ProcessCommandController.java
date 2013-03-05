@@ -9,7 +9,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
+import com.google.common.io.ByteStreams;
 
 @Controller
 @RequestMapping("/commands")
@@ -35,14 +37,21 @@ public class ProcessCommandController {
 	
 	@Inject
 	private ProcessCommandValidator validator;
-		
+
+	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+	
 	@RequestMapping(value = "/{commandName}", method = RequestMethod.POST)
 	@ResponseBody
 	public final String processCommand(final @PathVariable("commandName") String commandName, final HttpServletRequest req) throws JsonParseException, JsonMappingException, IOException, DuplicateException {
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 
 		final ObjectMapper mapper = new ObjectMapper();
-		final Object command = mapper.readValue(req.getInputStream(), commandType);
+		
+		final String json = new String(ByteStreams.toByteArray(req.getInputStream()));
+		
+		LOG.debug("got json {} command : {}", commandName, json);
+		
+		final Object command = mapper.readValue(json, commandType);
 
 		validator.validate(command);
 		
@@ -97,7 +106,7 @@ public class ProcessCommandController {
 		final String baseURI = builder.path("").build().toUri().toString();
 		
 		final InputStream is = this.getClass().getResourceAsStream("commandui.html");  
-		final String rawHtml = IOUtils.toString(is);
+		final String rawHtml = new String(ByteStreams.toByteArray(is));
 		is.close();
 
 		final String modifiedHtml = 
@@ -112,6 +121,7 @@ public class ProcessCommandController {
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	public String handleException1(Exception ex) {
+		LOG.error("will fail with 500 because of exception", ex);
 	    return ex.getMessage();
 	}
 

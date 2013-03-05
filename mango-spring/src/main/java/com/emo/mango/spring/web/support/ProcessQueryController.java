@@ -12,29 +12,18 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.emo.mango.cqs.DuplicateException;
-import com.emo.mango.cqs.ObjectBasedSearchCriteria;
-import com.emo.mango.cqs.ObjectBasedSearchValue;
-import com.emo.mango.cqs.PropertyBasedSearchValue;
 import com.emo.mango.cqs.QueryExecutor;
-import com.emo.mango.cqs.QueryItem;
-import com.emo.mango.cqs.SearchValue;
 import com.emo.mango.spring.cqs.support.MangoCQS;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
+import com.google.common.io.ByteStreams;
 
 @Controller
 @RequestMapping("queries")
@@ -53,20 +42,21 @@ public class ProcessQueryController {
 		}
 	}
 
-	private SearchValue readValueFromRequest(final QueryExecutor<?> executor,
+	private Object[] readValueFromRequest(final QueryExecutor executor,
 			final HttpServletRequest request) {
-		PropertyBasedSearchValue props = new PropertyBasedSearchValue();
 
-		for (final String criteria : executor.getSearchCriteria().getCriteria()) {
-			final Object value = (Object) request.getParameter(criteria);
-			props = props.withProperty(criteria, value);
+		final String[] names = executor.getParamNames();
+		final Object[] values = new Object[names.length]; 
+		
+		int i = 0;
+		for (final String name : names) {
+			values[i++] = (Object) request.getParameter(name);
 		}
 		
-		props.assertMatch(executor.getSearchCriteria());
-
-		return props;
+		return values;
 	}
 	
+	/*
 	private SearchValue readPostValueFromRequest(final QueryExecutor<?> executor,
 			final HttpServletRequest request) throws JsonParseException, JsonMappingException, IOException {
 		final String json = request.getParameter("json");
@@ -84,7 +74,7 @@ public class ProcessQueryController {
 		props.assertMatch(executor.getSearchCriteria());
 		
 		return props;
-	}
+	}*/
 
 	private Paging readPagingFromRequest(final HttpServletRequest request) {
 		final String sPage = request.getParameter("_page");
@@ -114,24 +104,25 @@ public class ProcessQueryController {
 	public final List<Object> query(
 			final @PathVariable("queryName") String queryName,
 			final HttpServletRequest request) throws DuplicateException {
-		QueryExecutor<?> executor = cqs.system().queryExecutor(queryName);
-
-		if (executor == null) {
+		
+		final QueryExecutor executor = cqs.system().getQueryExecutor(queryName);
+		
+		if (executor == null) { // TODO: check if this can happen!
 			throw new IllegalArgumentException("no query with name "
 					+ queryName);
-		}
+		}		
 
-		final SearchValue props = readValueFromRequest(executor, request);
 		final Paging paging = readPagingFromRequest(request);
 
 		if (paging != null) {
 			return (List<Object>) executor.pagedQuery(paging.page,
-					paging.perPage, props);
+					paging.perPage, readValueFromRequest(executor, request));
 		} else {
-			return (List<Object>) executor.query(props);
+			return (List<Object>) executor.query(readValueFromRequest(executor, request));
 		}
 	}
 	
+	/*
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/{queryName}", method = RequestMethod.POST)
 	@ResponseBody
@@ -156,25 +147,24 @@ public class ProcessQueryController {
 			return (List<Object>) executor.query(props);
 		}
 	}
-
+*/
 	
 	@RequestMapping(value = "/{queryName}/count", method = RequestMethod.GET)
 	@ResponseBody
 	public final long countItems(
 			final @PathVariable("queryName") String queryName,
 			final HttpServletRequest request) throws DuplicateException {
-		QueryExecutor<?> executor = cqs.system().queryExecutor(queryName);
+		QueryExecutor executor = cqs.system().getQueryExecutor(queryName);
 
 		if (executor == null) {
 			throw new IllegalArgumentException("no query with name "
 					+ queryName);
 		}
 
-		final SearchValue props = readValueFromRequest(executor, request);
-
-		return executor.countItems(props);
+		return executor.countItems(readValueFromRequest(executor, request));
 	}
 
+	/*
 	@RequestMapping(value = "/{queryName}/count", method = RequestMethod.POST)
 	@ResponseBody
 	public final long countItemsPost(
@@ -191,27 +181,26 @@ public class ProcessQueryController {
 
 		return executor.countItems(props);
 	}
-
+*/
 	
 	@RequestMapping(value = "/{queryName}/pages", method = RequestMethod.GET)
 	@ResponseBody
 	public final int countPages(
 			final @PathVariable("queryName") String queryName,
 			final HttpServletRequest request) throws DuplicateException {
-		QueryExecutor<?> executor = cqs.system().queryExecutor(queryName);
+		QueryExecutor executor = cqs.system().getQueryExecutor(queryName);
 
 		if (executor == null) {
 			throw new IllegalArgumentException("no query with name "
 					+ queryName);
 		}
 
-		final SearchValue props = readValueFromRequest(executor, request);
-
 		final int perPage = Integer.parseInt(request.getParameter("_perPage"));
 
-		return executor.countPages(perPage, props);
+		return executor.countPages(perPage, readValueFromRequest(executor, request));
 	}
 
+	/*
 	@RequestMapping(value = "/{queryName}/pages", method = RequestMethod.POST)
 	@ResponseBody
 	public final int countPagesPost(
@@ -230,24 +219,25 @@ public class ProcessQueryController {
 
 		return executor.countPages(perPage, props);
 	}
+*/
 
 
-	private final void doExport(final QueryExecutor<?> executor, final QueryItem queryItem, final SearchValue props, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+	private final void doExport(final QueryExecutor executor, final Object[] values, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 		final File exportFile = new File(new File(
 				System.getProperty("java.io.tmpdir")), "export-"
 				+ UUID.randomUUID().toString() + ".csv");
 
 		final CSVWriter writer = new CSVWriter(new FileWriter(exportFile), ';');
-		writer.writeNext(queryItem.columns());
+		// TODO: write a header! writer.writeNext(executor.);
 
 		final int perPage = 1000;
 
-		final long pages = executor.countPages(perPage, props);
+		final long pages = executor.countPages(perPage, values);
 
 		for (int i = 1; i <= pages; ++i) {
-			final List<?> items = executor.pagedQuery(i, perPage, props);
+			final List<?> items = executor.pagedQuery(i, perPage, values);
 			for (final Object item : items) {
-				final String[] itemProps = queryItem.valuesAsStringFor(item);
+				final String[] itemProps = null; // TODO: find a replacement for this : queryItem.valuesAsStringFor(item);
 				writer.writeNext(itemProps);
 			}
 		}
@@ -260,7 +250,7 @@ public class ProcessQueryController {
 
 		final InputStream is = new FileInputStream(exportFile);
 
-		IOUtils.copy(is, response.getOutputStream());
+		ByteStreams.copy(is, response.getOutputStream());
 
 		is.close();
 
@@ -274,20 +264,18 @@ public class ProcessQueryController {
 			final HttpServletRequest request, final HttpServletResponse response)
 			throws IOException, DuplicateException {
 		
-		QueryExecutor<?> executor = cqs.system().queryExecutor(queryName);
-		QueryItem queryItem = cqs.system().query(queryName);
+		QueryExecutor executor = cqs.system().getQueryExecutor(queryName);
 
 		if (executor == null) {
 			throw new IllegalArgumentException("no query with name "
 					+ queryName);
 		}
 
-		final SearchValue props = readValueFromRequest(executor, request);
-		
-		doExport(executor, queryItem, props, request, response);
+		doExport(executor, readValueFromRequest(executor, request), request, response);
 
 	}
 
+	/*
 	@RequestMapping(value = "/{queryName}/export/csv", method = RequestMethod.POST)
 	@ResponseBody
 	public final void exportQueryResultPost(
@@ -308,8 +296,9 @@ public class ProcessQueryController {
 		doExport(executor, queryItem, props, request, response);
 
 	}
-
+*/
 	
+	/*
 	@RequestMapping(value = "/{queryName}/form", method = RequestMethod.GET, produces = "text/html")
 	@ResponseBody
 	public final String displayQuerySearchForm(		
@@ -364,8 +353,9 @@ public class ProcessQueryController {
 
 		return node.toString();
 	}
+	*/
 	
-	
+	/*
 	private String renderQueryResult(final List<Object> results, final QueryItem queryItem, final String queryName, final HttpServletRequest request) throws IOException {
 		String header = "<thead><tr>";
 		for (final String field : queryItem.columns()) {
@@ -444,5 +434,5 @@ public class ProcessQueryController {
 
 		return renderQueryResult(results, queryItem, queryName, request);
 	}
-
+*/
 }
