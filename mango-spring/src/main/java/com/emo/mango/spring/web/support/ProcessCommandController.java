@@ -32,6 +32,8 @@ import com.google.common.io.ByteStreams;
 @Controller
 @RequestMapping("/commands")
 public class ProcessCommandController {
+	private final static Logger logger = LoggerFactory.getLogger(ProcessCommandController.class);
+	
 	@Inject
 	private MangoCQS cqs;
 	
@@ -109,6 +111,8 @@ public class ProcessCommandController {
 		final String rawHtml = new String(ByteStreams.toByteArray(is));
 		is.close();
 
+		logger.debug("raw html : " + rawHtml);
+		
 		final String modifiedHtml = 
 			rawHtml.replaceAll("##base##", baseURI)
 				.replaceAll("##command##", commandType.getName())

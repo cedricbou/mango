@@ -1,13 +1,9 @@
 package com.emo.mango.spring.query.support;
 
 import java.util.Collection;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
-
-import net.sf.extcos.ComponentQuery;
-import net.sf.extcos.ComponentScanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
