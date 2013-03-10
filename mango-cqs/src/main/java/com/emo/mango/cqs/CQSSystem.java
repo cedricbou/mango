@@ -5,6 +5,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
+import com.emo.mango.config.MangoConfig;
+import com.emo.mango.config.MangoConfigs;
 import com.emo.mango.cqs.internal.HandlerRepository;
 import com.emo.mango.cqs.internal.InternalCommandBus;
 import com.emo.mango.cqs.internal.QueryExecutorFactory;
@@ -18,7 +20,15 @@ public class CQSSystem {
 	
 	private final QueryExecutorRepository queryExecutorRepository = new QueryExecutorRepository();
 	
-	private final CommandBus bus = new InternalCommandBus(handlerRepository);
+	private final CommandBus bus;
+
+	public CQSSystem() {
+		this(MangoConfigs.singleton().get());
+	}
+	
+	public CQSSystem(final MangoConfig config) {
+		this.bus = new InternalCommandBus(handlerRepository, config);
+	}
 		
 	public void declareQueries(final Class<? extends Queries> queriesClass, final DataSource ds, final EntityManager em) {
 		final List<QueryExecutor> qes = queryExecutorFactory.executorsFor(queriesClass, ds, em);

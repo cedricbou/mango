@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.emo.mango.config.MangoConfig;
 import com.emo.mango.cqs.DuplicateException;
+import com.emo.mango.log.BusinessTransactionUtils;
 import com.emo.mango.spring.cqs.support.MangoCQS;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -32,110 +34,148 @@ import com.google.common.io.ByteStreams;
 @Controller
 @RequestMapping("/commands")
 public class ProcessCommandController {
-	private final static Logger logger = LoggerFactory.getLogger(ProcessCommandController.class);
-	
+	private final static Logger logger = LoggerFactory
+			.getLogger(ProcessCommandController.class);
+
 	@Inject
 	private MangoCQS cqs;
-	
+
+	@Inject
+	private MangoConfig config;
+
 	@Inject
 	private ProcessCommandValidator validator;
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-	
+
 	@RequestMapping(value = "/{commandName}", method = RequestMethod.POST)
 	@ResponseBody
-	public final String processCommand(final @PathVariable("commandName") String commandName, final HttpServletRequest req) throws JsonParseException, JsonMappingException, IOException, DuplicateException {
+	public final String processCommand(
+			final @PathVariable("commandName") String commandName,
+			final HttpServletRequest req) throws JsonParseException,
+			JsonMappingException, IOException, DuplicateException {
+		
+		BusinessTransactionUtils.bindNew();
+
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 
 		final ObjectMapper mapper = new ObjectMapper();
-		
-		final String json = new String(ByteStreams.toByteArray(req.getInputStream()));
-		
-		LOG.debug("got json {} command : {}", commandName, json);
-		
+		final String json = new String(ByteStreams.toByteArray(req
+				.getInputStream()));
+
 		final Object command = mapper.readValue(json, commandType);
 
-		validator.validate(command);
-		
-		cqs.bus().send(command);
+		config.loggers().access().log("rest.command", "process", command);
 
-		return "ok";
+		try {
+			validator.validate(command);
+			cqs.bus().send(command);
+		} finally {
+			config.loggers().chrono().log("rest.command", "process", command);
+		}
+
+		return "ok {" + BusinessTransactionUtils.bound().code + "}";
 	}
 
-	
 	private static class CommandHolder {
 		public String type;
 		public JsonNode command;
 	}
-	
+
 	@RequestMapping(value = "/batch", method = RequestMethod.POST)
 	@ResponseBody
 	protected final String processCommands(HttpServletRequest req)
 			throws IOException, DuplicateException {
-		
+
+		BusinessTransactionUtils.bindNew();
+
 		final ObjectMapper mapper = new ObjectMapper();
-		final List<CommandHolder> holders = mapper.readValue(req.getInputStream(), new TypeReference<List<CommandHolder>>() {});
-		
+		final List<CommandHolder> holders = mapper.readValue(
+				req.getInputStream(), new TypeReference<List<CommandHolder>>() {
+				});
+
 		final List<Object> commands = new LinkedList<Object>();
-		
-		final Iterator<CommandHolder> it = holders.iterator();
-		
-		while(it.hasNext()) {
-			CommandHolder commandHolder = it.next();
-			final Class<?> commandType = cqs.system().command(commandHolder.type).clazz;
-			final Object command = mapper.readValue(
-					commandHolder.command.toString(), commandType);
-			commands.add(command);
-		}
-		
-		for(final Object command : commands) {
-			validator.validate(command);
-		}
-		
-		for(final Object command : commands) {
-			cqs.bus().send(command);
+
+		config.loggers().access().log("rest.command", "batch", commands.size());
+
+		try {
+			final Iterator<CommandHolder> it = holders.iterator();
+
+			while (it.hasNext()) {
+				CommandHolder commandHolder = it.next();
+				final Class<?> commandType = cqs.system().command(
+						commandHolder.type).clazz;
+				final Object command = mapper.readValue(
+						commandHolder.command.toString(), commandType);
+				commands.add(command);
+			}
+
+			for (final Object command : commands) {
+				validator.validate(command);
+			}
+
+			for (final Object command : commands) {
+				cqs.bus().send(command);
+			}
+		} finally {
+			config.loggers().chrono()
+					.log("rest.command", "batch", commands.size());
 		}
 
-		return "ok";
+		return "ok {" + BusinessTransactionUtils.bound().code + "}";
 	}
 
-	
 	@RequestMapping(value = "/{commandName}", method = RequestMethod.GET, produces = "text/html")
 	@ResponseBody
-	public final String displayCommand(final @PathVariable("commandName") String commandName, UriComponentsBuilder builder) throws IOException, DuplicateException {
+	public final String displayCommand(
+			final @PathVariable("commandName") String commandName,
+			UriComponentsBuilder builder) throws IOException,
+			DuplicateException {
+		BusinessTransactionUtils.bindNew();
+
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
 
 		final String baseURI = builder.path("").build().toUri().toString();
-		
-		final InputStream is = this.getClass().getResourceAsStream("commandui.html");  
+
+		final InputStream is = this.getClass().getResourceAsStream(
+				"commandui.html");
 		final String rawHtml = new String(ByteStreams.toByteArray(is));
 		is.close();
 
 		logger.debug("raw html : " + rawHtml);
-		
-		final String modifiedHtml = 
-			rawHtml.replaceAll("##base##", baseURI)
+
+		final String modifiedHtml = rawHtml
+				.replaceAll("##base##", baseURI)
 				.replaceAll("##command##", commandType.getName())
-				.replaceAll("##command_url##", builder.path("/commands/{commandName}").buildAndExpand(commandName).toUri().toString())
-				.replaceAll("##schema_url##", builder.path("/schema").buildAndExpand(commandName).toUri().toString());
-		
+				.replaceAll(
+						"##command_url##",
+						builder.path("/commands/{commandName}")
+								.buildAndExpand(commandName).toUri().toString())
+				.replaceAll(
+						"##schema_url##",
+						builder.path("/schema").buildAndExpand(commandName)
+								.toUri().toString());
+
 		return modifiedHtml;
 	}
-	
+
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	public String handleException1(Exception ex) {
-		LOG.error("will fail with 500 because of exception", ex);
-	    return ex.getMessage();
+		LOG.error(
+				"Rest servlet transaction will fail with 500 because of exception",
+				ex);
+		return ex.getMessage();
 	}
-
 
 	@RequestMapping(value = "/{commandName}/schema", method = RequestMethod.GET)
 	@ResponseBody
-	public final String schemaCommand(final @PathVariable("commandName") String commandName) throws JsonMappingException, DuplicateException {
+	public final String schemaCommand(
+			final @PathVariable("commandName") String commandName)
+			throws JsonMappingException, DuplicateException {
 
 		final Class<?> commandType = cqs.system().command(commandName).clazz;
-		
+
 		final ObjectMapper mapper = new ObjectMapper();
 		final JsonSchema schema = mapper.generateJsonSchema(commandType);
 
@@ -145,6 +185,4 @@ public class ProcessCommandController {
 		return node.toString();
 	}
 
-	
-	
 }

@@ -78,5 +78,11 @@
 			<artifactId>mango-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>mango</groupId>
+			<artifactId>mango-config</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>

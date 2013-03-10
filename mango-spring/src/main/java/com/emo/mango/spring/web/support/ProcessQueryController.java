@@ -21,9 +21,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
+import com.emo.mango.config.MangoConfig;
 import com.emo.mango.cqs.DuplicateException;
 import com.emo.mango.cqs.QueryExecutor;
 import com.emo.mango.json.utils.JsonUtils;
+import com.emo.mango.log.BusinessTransactionUtils;
+import com.emo.mango.log.LogParam;
 import com.emo.mango.spring.cqs.support.MangoCQS;
 import com.google.common.base.Joiner;
 import com.google.common.io.ByteStreams;
@@ -34,10 +37,13 @@ public class ProcessQueryController {
 
 	@Inject
 	private MangoCQS cqs;
+	
+	@Inject
+	private MangoConfig config;
 
 	private static class Paging {
-		public final int page;
-		public final int perPage;
+		public @LogParam final int page;
+		public @LogParam final int perPage;
 
 		public Paging(final int page, final int perPage) {
 			this.page = page;
@@ -53,8 +59,10 @@ public class ProcessQueryController {
 
 		int i = 0;
 		for (final String name : names) {
-			if(request.getParameter(name) == null) {
-				throw new IllegalArgumentException("expected parameter for queries : " + Joiner.on(", ").join(names));
+			if (request.getParameter(name) == null) {
+				throw new IllegalArgumentException(
+						"expected parameter for queries : "
+								+ Joiner.on(", ").join(names));
 			}
 			values[i++] = (Object) request.getParameter(name);
 		}
@@ -110,6 +118,8 @@ public class ProcessQueryController {
 			final @PathVariable("queryName") String queryName,
 			final HttpServletRequest request) throws DuplicateException {
 
+		BusinessTransactionUtils.bindNew();
+		
 		final QueryExecutor executor = cqs.system().getQueryExecutor(queryName);
 
 		if (executor == null) { // TODO: check if this can happen!
@@ -117,15 +127,22 @@ public class ProcessQueryController {
 					+ queryName);
 		}
 
+		final Object[] values = readValueFromRequest(executor, request);
 		final Paging paging = readPagingFromRequest(request);
 
-		if (paging != null) {
-			return (List<Object>) executor.pagedQuery(paging.page,
-					paging.perPage, readValueFromRequest(executor, request));
-		} else {
-			return (List<Object>) executor.query(readValueFromRequest(executor,
-					request));
-		}
+		config.loggers().access().log("rest.query", queryName, values,
+				paging);
+		
+		try {
+			if (paging != null) {
+				return (List<Object>) executor.pagedQuery(paging.page,
+						paging.perPage, values);
+			} else {
+				return (List<Object>) executor.query(values);
+			}
+		} finally {
+			config.loggers().chrono().log("rest.query", queryName, values,
+					paging);		}
 	}
 
 	/*
@@ -250,7 +267,8 @@ public class ProcessQueryController {
 				}
 
 				for (final Object item : items) {
-					final String[] itemProps = JsonUtils.getRootValuesAsString(item);
+					final String[] itemProps = JsonUtils
+							.getRootValuesAsString(item);
 					writer.writeNext(itemProps);
 				}
 			}
@@ -426,13 +444,12 @@ public class ProcessQueryController {
 		int previousPage = (paging == null) ? 0 : paging.page - 1;
 		int nextPage = (paging == null) ? 2 : paging.page + 1;
 
-		final String baseUrl = builder
-				.replaceQueryParam("_page", paging.page).build().toUri()
-				.toString();
-		
+		final String baseUrl = builder.replaceQueryParam("_page", paging.page)
+				.build().toUri().toString();
+
 		// FIXME: this is dangerous, find a better and safer way to rebuild URL.
 		final String exportUrl = baseUrl.replace("/view", "/export/csv");
-		
+
 		final String previousUrl = builder
 				.replaceQueryParam("_page", previousPage).build().toUri()
 				.toString();
@@ -448,7 +465,7 @@ public class ProcessQueryController {
 				+ ((!hasResults) ? "#" : nextUrl) + "\">Next</a></li></ul>";
 
 		modifiedHtml = modifiedHtml.replaceAll("##pager##", pager);
-		
+
 		modifiedHtml = modifiedHtml.replaceAll("##exporturl##", exportUrl);
 
 		return modifiedHtml;

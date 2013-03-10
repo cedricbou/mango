@@ -18,7 +18,6 @@
 			<groupId>mango</groupId>
 			<artifactId>mango-commons</artifactId>
 			<version>${project.version}</version>
-			<type>pom</type>
 		</dependency>
 
 		<dependency>
