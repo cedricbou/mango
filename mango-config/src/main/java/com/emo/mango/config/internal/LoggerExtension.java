@@ -12,7 +12,19 @@ import com.typesafe.config.Config;
 public class LoggerExtension {
 
 	private Loggers loggers;
+	
+	private static final String DEFAULT_BASE_DIR = temp();
 
+	private static String temp() {
+		String tempdir = System.getProperty("java.io.tmpdir");
+
+		if ( !(tempdir.endsWith("/") || tempdir.endsWith("\\")) ) {
+		   tempdir = tempdir + System.getProperty("file.separator");
+		}
+		
+		return tempdir;
+	}
+	
 	public void onConfigurationChanged(Config loggersConfig) {
 		final LogConfiguration access;
 		final LogConfiguration chrono;
@@ -44,17 +56,22 @@ public class LoggerExtension {
 				.getString("logger") : defaultLoggerName;
 		final String dumper = config.hasPath("dumper") ? config
 				.getString("dumper") : "Simple";
+		final String file = config.hasPath("file") ? config.getString("file") : DEFAULT_BASE_DIR + defaultLoggerName + ".log";
+		final String fileNamePattern = config.hasPath("fileNamePattern") ? config
+				.getString("fileNamePattern") : defaultLoggerName + ".%d.log";
 
 		final ParamDumpType type = ParamDumpType.valueOf(dumper);
 
 		return new LogConfiguration(ParamDumpFactory.dumper(type),
-				LoggerFactory.getLogger(logger));
+				LoggerFactory.getLogger(logger), file, fileNamePattern);
 	}
 
 	private final LogConfiguration defaultConfig(final String defaultLoggerName) {
 		return new LogConfiguration(
 				ParamDumpFactory.dumper(ParamDumpType.Simple),
-				LoggerFactory.getLogger(defaultLoggerName));
+				LoggerFactory.getLogger(defaultLoggerName),
+				DEFAULT_BASE_DIR  + defaultLoggerName + ".log",
+				DEFAULT_BASE_DIR  + defaultLoggerName + ".%d.log");
 	}
 
 	public Loggers loggers() {

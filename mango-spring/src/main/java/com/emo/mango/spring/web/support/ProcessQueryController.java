@@ -2,11 +2,9 @@ package com.emo.mango.spring.web.support;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import au.com.bytecode.opencsv.CSVWriter;
 
 import com.emo.mango.config.MangoConfig;
 import com.emo.mango.cqs.DuplicateException;
@@ -245,36 +241,8 @@ public class ProcessQueryController {
 	private final void doExport(final QueryExecutor executor,
 			final Object[] values, final HttpServletRequest request,
 			final HttpServletResponse response) throws IOException {
-		final File exportFile = new File(new File(
-				System.getProperty("java.io.tmpdir")), "export-"
-				+ UUID.randomUUID().toString() + ".csv");
-
-		final CSVWriter writer = new CSVWriter(new FileWriter(exportFile), ';');
-
-		boolean writeHeader = true;
-
-		final int perPage = 1000;
-
-		final long pages = executor.countPages(perPage, values);
-
-		for (int i = 1; i <= pages; ++i) {
-			final List<?> items = executor.pagedQuery(i, perPage, values);
-
-			if (items != null && items.size() > 0) {
-				if (writeHeader) {
-					writer.writeNext(JsonUtils.getRootFieldNames(items.get(0)));
-					writeHeader = false;
-				}
-
-				for (final Object item : items) {
-					final String[] itemProps = JsonUtils
-							.getRootValuesAsString(item);
-					writer.writeNext(itemProps);
-				}
-			}
-		}
-
-		writer.close();
+		
+		final File exportFile = new QueryToCsv(executor, values).generate();
 
 		response.setContentType("text/csv");
 		response.setHeader("Content-Disposition", "inline; filename=\""

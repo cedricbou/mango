@@ -10,6 +10,6 @@ public class AppLog extends Log {
 	public void log(String subject, String action, Object... args) {
 		final BusinessTransaction bt = BusinessTransactionUtils.bound();
 		
-		config.logger.info("{{}} {}", bt.code, config.dumper.dump(args));
+		config.logger.info("{{}} {}.{} {}", bt.code, subject, action, config.dumper.dump(args));
 	}
 }

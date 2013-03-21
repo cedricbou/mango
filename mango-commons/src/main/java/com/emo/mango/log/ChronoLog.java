@@ -10,7 +10,7 @@ public class ChronoLog extends Log {
 	public void log(String subject, String action, Object... args) {
 		final BusinessTransaction bt = BusinessTransactionUtils.bound();
 		
-		config.logger.info("{{}} ({} ms) {}", bt.code,
+		config.logger.info("{{}} ({} ms) {}.{} {}", bt.code,
 				bt.timeSinceBeginning(), config.dumper.dump(args));
 	}
 }
